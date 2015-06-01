@@ -67,8 +67,8 @@ ADAM_CLI_JAR=$(ls $CLI_DIR/*/adam-cli_2.1[01]-*.jar)
 # Split args into Spark args and ADAM args
 # NOTE: if Spark uses gatherSparkSubmitOpts in spark-submit, this is unnecessary
 function usage() {
-  echo "adam-submit <spark-args> <adam-args>"
-  exit 0
+ echo "adam-submit <spark-args> <adam-args>"
+ exit 0
 }
 # if [ -f "$SPARK_HOME"/libexec/bin/utils.sh ]; then
 #  source "$SPARK_HOME"/libexec/bin/utils.sh
@@ -125,9 +125,7 @@ export HADOOP_USER_NAME=hdfs
 
 # submit the job to Spark
 echo " "$SPARK_SUBMIT" \
-  --master yarn \
-  --deploy-mode cluster \
-  --num-executors 4 \
+  --master local \
   --class org.bdgenomics.adam.cli.ADAMMain \
   --conf spark.serializer=org.apache.spark.serializer.KryoSerializer \
   --conf spark.kryo.registrator=org.bdgenomics.adam.serialization.ADAMKryoRegistrator \
@@ -143,9 +141,7 @@ echo " "$SPARK_SUBMIT" \
 
 # submit the job to Spark
  "$SPARK_SUBMIT" \
-  --master yarn \
-  --deploy-mode cluster \
-  --num-executors 4 \
+  --master local \
   --class org.bdgenomics.adam.cli.ADAMMain \
   --conf spark.serializer=org.apache.spark.serializer.KryoSerializer \
   --conf spark.kryo.registrator=org.bdgenomics.adam.serialization.ADAMKryoRegistrator \
