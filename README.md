@@ -11,6 +11,8 @@ ADAM
 * View our software artifacts on Maven Central at [http://search.maven.org/#search%7Cga%7C1%7Corg.bdgenomics](http://search.maven.org/#search%7Cga%7C1%7Corg.bdgenomics)
 * See our snapshots at [https://oss.sonatype.org/index.html#nexus-search;quick~bdgenomics](https://oss.sonatype.org/index.html#nexus-search;quick~bdgenomics)
 * Look at our CHANGES file at [https://github.com/bigdatagenomics/adam/blob/master/CHANGES.md](https://github.com/bigdatagenomics/adam/blob/master/CHANGES.md)
+* Url for downloading adam-distribution snapshot
+http://repo.biodtlab.com/service/local/artifact/maven/redirect?r=snapshots&g=org.bdgenomics.adam&a=adam-distribution_2.10&c=bin&e=tar.gz&v=0.17.1-SNAPSHOT
 
 ADAM is a genomics analysis platform with specialized file formats built using [Apache Avro](http://avro.apache.org), [Apache Spark](http://spark.incubator.apache.org/) and [Parquet](http://parquet.io/). Apache 2 licensed.  
 
