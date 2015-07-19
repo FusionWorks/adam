@@ -124,10 +124,9 @@ SPARK_SUBMIT=spark-submit
 export HADOOP_USER_NAME=hdfs
 
 # submit the job to Spark
-echo " "$SPARK_SUBMIT" \
+COMMAND=""$SPARK_SUBMIT" \
   --master yarn \
   --deploy-mode cluster \
-  --num-executors 4 \
   --class org.bdgenomics.adam.cli.ADAMMain \
   --conf spark.serializer=org.apache.spark.serializer.KryoSerializer \
   --conf spark.kryo.registrator=org.bdgenomics.adam.serialization.ADAMKryoRegistrator \
@@ -140,20 +139,5 @@ echo " "$SPARK_SUBMIT" \
   "$ADAM_CLI_JAR" \
   "${APPLICATION_OPTS[@]}"
 "
-
-# submit the job to Spark
- "$SPARK_SUBMIT" \
-  --master yarn \
-  --deploy-mode cluster \
-  --num-executors 4 \
-  --class org.bdgenomics.adam.cli.ADAMMain \
-  --conf spark.serializer=org.apache.spark.serializer.KryoSerializer \
-  --conf spark.kryo.registrator=org.bdgenomics.adam.serialization.ADAMKryoRegistrator \
-  --conf spark.kryoserializer.buffer.mb=4 \
-  --conf spark.kryo.referenceTracking=true \
-  ${ADAM_OPTS:- } \
-  --conf spark.executor.memory=${ADAM_EXECUTOR_MEMORY:-"8g"} \
-  --driver-memory ${ADAM_DRIVER_MEMORY:-"8g"} \
-  "${SUBMISSION_OPTS[@]}" \
-  "$ADAM_CLI_JAR" \
-  "${APPLICATION_OPTS[@]}"
+echo $COMMAND
+$COMMAND
