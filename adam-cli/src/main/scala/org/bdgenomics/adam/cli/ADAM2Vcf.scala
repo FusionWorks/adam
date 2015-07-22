@@ -18,15 +18,14 @@
 package org.bdgenomics.adam.cli
 
 import java.io.File
+
 import org.apache.spark.rdd.RDD
-import org.apache.spark.{ Logging, SparkContext }
-import org.apache.hadoop.mapreduce.Job
+import org.apache.spark.{Logging, SparkContext}
 import org.bdgenomics.adam.models.SequenceDictionary
 import org.bdgenomics.adam.rdd.ADAMContext._
 import org.bdgenomics.formats.avro.Genotype
 import org.bdgenomics.utils.cli._
-import org.kohsuke.args4j.{ Option => Args4jOption, Argument }
-import scala.Option
+import org.kohsuke.args4j.{Argument, Option => Args4jOption}
 
 object ADAM2Vcf extends BDGCommandCompanion {
 
@@ -53,6 +52,9 @@ class ADAM2VcfArgs extends Args4jBase with ParquetArgs {
 
   @Args4jOption(required = false, name = "-sort_on_save", usage = "Sort the VCF output.")
   var sort: Boolean = false
+
+  @Args4jOption(required = false, name = "-single", usage = "Saves OUTPUT as single file")
+  var asSingleFile: Boolean = false
 }
 
 class ADAM2Vcf(val args: ADAM2VcfArgs) extends BDGSparkCommand[ADAM2VcfArgs] with DictionaryCommand with Logging {
@@ -72,6 +74,6 @@ class ADAM2Vcf(val args: ADAM2VcfArgs) extends BDGSparkCommand[ADAM2VcfArgs] wit
     }
 
     adamGTs.toVariantContext
-      .saveAsVcf(args.outputPath, dict = dictionary, sortOnSave = args.sort, coalesceTo = coalesce)
+      .saveAsVcf(args.outputPath, dict = dictionary, sortOnSave = args.sort, coalesceTo = coalesce, asSingleFile = args.asSingleFile)
   }
 }

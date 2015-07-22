@@ -17,23 +17,16 @@
  */
 package org.bdgenomics.adam.rdd.variation
 
+import org.apache.hadoop.fs.{FileSystem, FileUtil, Path}
 import org.apache.hadoop.io.LongWritable
+import org.apache.spark.Logging
 import org.apache.spark.SparkContext._
-import org.apache.spark.{ Logging, SparkContext }
-import org.apache.spark.rdd.RDD
+import org.apache.spark.rdd.{PartitionPruningRDD, RDD}
 import org.bdgenomics.adam.converters.VariantContextConverter
-import org.bdgenomics.adam.models.{
-  ReferencePosition,
-  ReferenceRegion,
-  SequenceDictionary,
-  SequenceRecord,
-  VariantContext
-}
+import org.bdgenomics.adam.models.{ReferencePosition, ReferenceRegion, SequenceDictionary, SequenceRecord, VariantContext}
 import org.bdgenomics.adam.rdd.ADAMSequenceDictionaryRDDAggregator
 import org.bdgenomics.adam.rich.RichVariant
-import org.bdgenomics.adam.rich.RichGenotype._
-import org.bdgenomics.formats.avro.{ Genotype, GenotypeType, DatabaseVariantAnnotation }
-import org.bdgenomics.utils.misc.HadoopUtil
+import org.bdgenomics.formats.avro.{DatabaseVariantAnnotation, Genotype}
 import org.seqdoop.hadoop_bam._
 
 class VariantContextRDDFunctions(rdd: RDD[VariantContext]) extends ADAMSequenceDictionaryRDDAggregator[VariantContext](rdd) with Logging {
@@ -81,7 +74,7 @@ class VariantContextRDDFunctions(rdd: RDD[VariantContext]) extends ADAMSequenceD
   def saveAsVcf(filePath: String,
                 dict: Option[SequenceDictionary] = None,
                 sortOnSave: Boolean = false,
-                coalesceTo: Option[Int] = None) = {
+                coalesceTo: Option[Int] = None, asSingleFile: Boolean = false) = {
     val vcfFormat = VCFFormat.inferFromFilePath(filePath)
     assert(vcfFormat == VCFFormat.VCF, "BCF not yet supported") // TODO: Add BCF support
 
@@ -137,13 +130,51 @@ class VariantContextRDDFunctions(rdd: RDD[VariantContext]) extends ADAMSequenceD
     // save to disk
     val conf = rdd.context.hadoopConfiguration
     conf.set(VCFOutputFormat.OUTPUT_VCF_FORMAT_PROPERTY, vcfFormat.toString)
-    withKey.saveAsNewAPIHadoopFile(filePath,
-      classOf[LongWritable], classOf[VariantContextWritable], classOf[ADAMVCFOutputFormat[LongWritable]],
-      conf)
+    if (!asSingleFile) {
+      withKey.saveAsNewAPIHadoopFile(filePath,
+        classOf[LongWritable], classOf[VariantContextWritable], classOf[ADAMVCFOutputFormat[LongWritable]],
+        conf)
+    } else {
+      log.info(s"Writing single $vcfFormat file (not Hadoop-style directory)")
 
+      val headPath = filePath + "_head"
+      val tailPath = filePath + "_tail"
+
+      PartitionPruningRDD.create(withKey,i=>{i==0}).saveAsNewAPIHadoopFile(
+        headPath,
+        classOf[LongWritable],
+        classOf[VariantContextWritable],
+        classOf[ADAMVCFOutputFormat[LongWritable]],
+        conf
+      )
+
+      conf.set(KeyIgnoringVCFOutputFormat.WRITE_HEADER_PROPERTY,"false")
+      PartitionPruningRDD.create(withKey,i=>{i!=0}).saveAsNewAPIHadoopFile(
+        tailPath,
+        classOf[LongWritable],
+        classOf[VariantContextWritable],
+        classOf[ADAMVCFOutputFormat[LongWritable]],
+        conf
+      )
+
+      conf.set(KeyIgnoringVCFOutputFormat.WRITE_HEADER_PROPERTY,"true")
+
+      val fs = FileSystem.get(conf)
+
+      fs.listStatus(headPath)
+        .find(_.getPath.getName.startsWith("part-r"))
+        .map(fileStatus => FileUtil.copy(fs, fileStatus.getPath, fs, tailPath + "/head", false, false, conf))
+      fs.delete(headPath, true)
+
+      FileUtil.copyMerge(fs, tailPath, fs, filePath, true, conf, null)
+      fs.delete(tailPath, true)
+
+    }
     log.info("Write %d records".format(gatkVCs.count()))
     rdd.unpersist()
   }
+  implicit def str2Path(str: String): Path = new Path(str)
+
 }
 
 class GenotypeRDDFunctions(rdd: RDD[Genotype]) extends Serializable with Logging {
