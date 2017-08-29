@@ -121,7 +121,8 @@ SUBMIT_USAGE_FUNCTION=usage
 gatherSparkSubmitOpts $NEW_OPTIONS
 
 SPARK_SUBMIT=spark-submit
-export HADOOP_USER_NAME=hdfs
+# export HADOOP_USER_NAME=hdfs
+export HADOOP_USER_NAME=cloudera-scm
 
 # submit the job to Spark
 COMMAND=""$SPARK_SUBMIT" \
