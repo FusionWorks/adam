@@ -414,7 +414,7 @@
         <groupId>org.apache.spark</groupId>
         <artifactId>spark-core_2.10</artifactId>
         <version>${spark.version}</version>
-        <scope>provided</scope>
+<!--         <scope>provided</scope> -->
         <exclusions>
           <exclusion>
             <groupId>org.apache.hadoop</groupId>
