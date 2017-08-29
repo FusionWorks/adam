@@ -29,37 +29,14 @@
   </properties>
 
   <distributionManagement>
-<!--     <repository>
+    <repository>
       <id>biodatomics-repo</id>
-      <url>http://repo.biodtlab.com/content/repositories/releases</url>
+      <url>http://10.101.40.220:8091/nexus/content/repositories/releases</url>
     </repository>
     <snapshotRepository>
       <id>biodatomics-snapshots-repo</id>
-      <url>http://repo.biodtlab.com/content/repositories/snapshots</url>
-    </snapshotRepository> -->
-    <repository>
-            <id>biodatomics-repo</id>
-            <name>Biodatomics Repository</name>
-            <url>http://10.101.40.220:8091/nexus/content/repositories/releases</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-
-        <repository>
-            <id>biodatomics-snapshots-repo</id>
-            <name>Biodatomics Snapshot Repository</name>
-            <url>http://10.101.40.220:8091/nexus/content/repositories/snapshots</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
+      <url>http://10.101.40.220:8091/nexus/content/repositories/snapshots</url>
+    </snapshotRepository>
   </distributionManagement>
 
   <modules>
